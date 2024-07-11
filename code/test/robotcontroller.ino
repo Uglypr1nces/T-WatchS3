@@ -1,3 +1,11 @@
+/**
+ * @file      DisplayRotation.ino
+ * @author    Lewis He (lewishe@outlook.com)
+ * @license   MIT
+ * @copyright Copyright (c) 2023  Shenzhen Xin Yuan Electronic Technology Co., Ltd
+ * @date      2023-04-23
+ *
+ */
 #include <LilyGoLib.h>
 #include <LV_Helper.h>
 #include <WiFi.h>
@@ -14,7 +22,27 @@ WiFiClient client;
 bool isPmuIRQ = false;
 uint8_t rotation = 2;
 
-lv_obj_t *label;
+void func()
+{
+    char buff[MAX];
+    int n;
+    for (;;) {
+        memset(buff, 0, sizeof(buff));
+        Serial.print("Enter the string: ");
+        n = 0;
+        while ((buff[n++] = Serial.read()) != '\n' && n < MAX)
+            ;
+        client.write((uint8_t*)buff, n);
+        memset(buff, 0, sizeof(buff));
+        client.read((uint8_t*)buff, sizeof(buff));
+        Serial.print("From Server: ");
+        Serial.println(buff);
+        if ((strncmp(buff, "exit", 4)) == 0) {
+            Serial.println("Client Exit...");
+            break;
+        }
+    }
+}
 
 void setRotation()
 {
@@ -24,7 +52,6 @@ void setRotation()
     watch.setWaveform(0, 10);
     watch.run();
 }
-
 
 void up_button_handler(lv_event_t *e)
 {
@@ -48,10 +75,6 @@ void down_button_handler(lv_event_t *e)
 
 void setup(void)
 {
-    label = lv_label_create();
-    lv_label_set_text(label, "UP");
-    lv_obj_center(label);
-    
     Serial.begin(115200);
 
     watch.begin();
@@ -59,11 +82,11 @@ void setup(void)
     beginLvglHelper();
 
     WiFi.begin(ssid, password);
-
     if (!client.connect(SERVER_IP, PORT)) {
 
     } else {
-        setRotation();
+        Serial.println("Connected to server");
+        func();
     }
 
     watch.attachPMU([]() {
