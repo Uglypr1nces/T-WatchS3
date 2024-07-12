@@ -22,7 +22,6 @@ void setup(void) {
     // Initialize LVGL and create label
     lv_init();
     label = lv_label_create(lv_scr_act());
-    
     lv_label_set_text(label, "not connected");
     lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
 
